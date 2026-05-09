@@ -1,0 +1,9 @@
+.venv
+
+# Datasets not needed to be imported
+Prices-Export_Retail_Jan 2000 to May 2026 Part 2.csv
+Commodities-Export-Fri May 08 2026 01_51_11 GMT+0800 (Philippine Standard Time).csv
+Prices-Export_Wholesale_Jan 2000 to May 2023.csv
+Prices-Export_Wholesale_Jan 2000 to May 2026.csv
+MFI_DataExport_2026-05-31.csv
+metadata-wfp-food-prices.csv
