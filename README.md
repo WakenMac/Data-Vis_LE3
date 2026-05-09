@@ -12,23 +12,23 @@ cd <project-folder-name>
 ### 2. Set up the Virtual Environment
 Create and activate a virtual environment to keep your dependencies isolated.
 
-# Create the environment
+#### Create the environment
 ```bash
 python -m venv .venv
 ```
 
-# Activate the environment
+#### Activate the environment
 ```bash
 .venv\Scripts\activate
 ```
 
-# Install dependencies
+#### Install dependencies
 ```bash
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-# For em Mac Users
+#### For em Mac Users
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
