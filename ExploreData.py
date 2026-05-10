@@ -2,6 +2,7 @@ import pandas as pd
 import geopy 
 
 data = pd.read_csv("Datasets\\Prices_Retail_Jan 2000 to May 2026.csv")
+data = pd.read_csv("Datasets\\prices_retail.csv")
 
 # Gets the unique values per oolumn
 for col in data.columns:
