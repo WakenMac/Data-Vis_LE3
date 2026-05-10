@@ -5,12 +5,12 @@ Follow these steps to get the application up and running on your local machine.
 ### 1. Clone the Repository
 First, clone the project to your local directory:
 ```bash
-git clone <your-repository-link-here>
+git clone https://github.com/WakenMac/Data-Vis_LE3
 cd <project-folder-name>
 ```
 
 ### 2. Set up the Virtual Environment
-Create and activate a virtual environment to keep your dependencies isolated.
+Head to the directory of the cloned repository. In there, create and activate a virtual environment to keep your dependencies isolated.
 
 #### Create the environment
 ```bash
