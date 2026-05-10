@@ -2,8 +2,6 @@ from shiny import App, ui, render, reactive
 from shinywidgets import output_widget, render_widget
 import plotly.express as px
 import pandas as pd
-from plotnine import ggplot, aes, geom_point, theme_minimal
-import pandas as pd
 import plotly.graph_objects as go
 
 df = pd.read_csv('Datasets\\prices_retail.csv')
@@ -46,12 +44,13 @@ def summary_page():
             style="color: #666; font-size: 0.9em;"
         ),
         output_widget("monthly_z_comparison"),
+        full_screen=True
     ),
 
     tables_section = ui.navset_tab(
         # TAB 1: The Quick Look
         ui.nav_panel(
-            "Quick View",
+            "Price Overview",
             ui.card(
                 ui.h4("Recent Top Commodity Price Hikes and Rollbacks"),
                 ui.output_ui("dynamic_subtitle"),
@@ -65,12 +64,13 @@ def summary_page():
                         ui.output_data_frame("hikes_table")
                     ),
                     gap="1rem"
-                )
+                ),
+                full_screen=True
             )
         ),
 
         ui.nav_panel(
-            "Inter-Market Comparison",
+            "Regional Price Parity",
             ui.card(
                 ui.h4("Comparison of Commodity Prices across the different Regional Markets"),
                 ui.p(
@@ -102,7 +102,8 @@ def summary_page():
 
                     output_widget("market_comparison_chart"),
                     style="height: 400px; overflow-y: auto; padding: 0px;"
-                )
+                ),
+                full_screen=True
             )
         ),
         
@@ -129,7 +130,8 @@ def summary_page():
                     # The detailed table with ALPS logic
                     ui.output_data_frame("market_alps_table"),
                     style="height: 400px; overflow-y: auto; padding: 0px;"
-                )
+                ),
+                full_screen=True
             )
         )
     )
@@ -165,21 +167,13 @@ def summary_page():
                         style="color: #666; font-size: 0.9em;"
                     ),
                     output_widget("volatility_chart"),
+                    full_screen=True
                 )
             )
-        ),
-        full_screen=True
+        )
     )
 
     z_score_section = ui.card(
-        ui.h4("Regional Average Price Ranges (Z-Score Distribution)"),
-        ui.p(
-            ui.HTML(
-                'Plots the different prices (<em>z-score</em>) of a commodity type across the 16 Philippine Regions.<br>'
-                'The <strong>greener</strong> (smaller z-score) the bar, the <strong>cheaper</strong> the commodity type is in the particular region.'
-            ), 
-            style="color: #666; font-size: 0.9em;"
-        ),
         ui.layout_sidebar(
             ui.sidebar(
                 ui.h5("Commodity Filter"),
@@ -194,13 +188,23 @@ def summary_page():
                 bg="#f8f9fa" 
             ),
             # The plot area
-            output_widget("z_score_plot"),
-        ),
-        full_screen=True
+            ui.card(
+                ui.h4("Regional Average Price Ranges (Z-Score Distribution)"),
+                ui.p(
+                    ui.HTML(
+                        'Plots the different prices (<em>z-score</em>) of a commodity type across the 16 Philippine Regions.<br>'
+                        'The <strong>greener</strong> (smaller z-score) the bar, the <strong>cheaper</strong> the commodity type is in the particular region.'
+                    ), 
+                    style="color: #666; font-size: 0.9em;"
+                ),
+                output_widget("z_score_plot"),
+                full_screen=True
+            )
+        )
     )
     
     return ui.nav_panel(
-        "Summary",
+        "Market Snapshot",
         ui.div(
             regional_analytics_section,
             ui.br(),
@@ -255,7 +259,7 @@ def historical_data_page():
     )
 
     return ui.nav_panel(
-        "Historical Data",
+        "Temporal Trends",
         style,
         ui.layout_sidebar(
             sidebar,
@@ -276,7 +280,16 @@ def historical_data_page():
             ),
 
             ui.card(
-                output_widget("market_min_max_plot"),
+                ui.output_ui('hist_min_max_header'),
+                ui.p(
+                    ui.HTML('The <strong>average price</strong> of a commodity across the different markets in the region'), 
+                    style="color: #666; font-size: 0.9em;"
+                ),
+                ui.div(
+                    output_widget("market_min_max_plot"),
+                    style="height: 500px; width=100%; overflow-x: auto; overflow-y: auto;"
+                    # style="height: 500px; overflow-x: auto; overflow-y: auto; overflow-x: hidden"
+                ),
                 full_screen=True
             ),
 
@@ -288,58 +301,142 @@ def historical_data_page():
 def info_page():
     """The About/Context page."""
     return ui.nav_panel(
-        "Info",
-        ui.h3("About This Dashboard"),
+        "About the Dashboard",
+        ui.tags.style("""
+            .card-body p {
+                margin-bottom: 5px; /* Shrinks the gap between markdown paragraphs */
+            }
+        """),
         ui.markdown("""
-        
-        #### Authors: 
+# Study Overview: Philippine Commodity Price Dashboard
 
-        **Dataset:** WFP VAM Price Dataset
-        
-        **Data Dictionary:**
-        * `Admin 1` / `Admin 2`: Regional and provincial boundaries.
-        * `Commodity`: The specific food or non-food item.
-        * `ALPS Phase`: Alert for Price Spikes indicator.
-        * `Pewi`: Price Equivalent Wealth Index.
-        
-        #### Methodology: Price Volatility & Normalization
+### Authors
+- Waken Cean C. Maclang
+- Jeff Ronyl R. Pausal
+- Theo Benedict Pasia\
 
-        This document outlines the mathematical foundations for analyzing commodity price fluctuations using Z-Scores and the Coefficient of Variation (CV).
 
-        ---
+### Introduction
+Food security in the archipelagic Philippines is a multi-dimensional challenge influenced by geography, climate, and infrastructure. While broad inflationary metrics provide a national overview, they often mask the acute price disparities experienced in remote or urban-congested regions. This study shifts the focus from national averages to a granular, market-centric analysis of 64 commodities from 2000 to 2026.\
 
-        ###### 1. Z-Score (Standard Score)
 
-        The **Z-Score** is used to determine how far a specific price point is from the historical average, measured in units of standard deviation. This allows for a "fair comparison" between commodities with vastly different price ranges (e.g., comparing a ₱5 increase in Rice vs. a ₱50 increase in Beef).
+### Problem Statement:
+1. The "Price Gap" Problem: “To what extent do consumers in different local markets face price disparities for the same essential commodity, and which specific markets consistently maintain the lowest price floors?”
+2. The "Volatility Vulnerability" Problem: “Which commodity categories (e.g., Grains vs. Seafood) exhibit the highest sensitivity to market shocks, and how has this sensitivity evolved over the last 12 months?”
+3. The "Erosion of Value" Problem: “How has the purchasing power of consumers changed over a specific multi-year period, and what is the exact 'peso-impact' of these changes on a per-kilo basis?”
+4. The "Commodity Divergence" Problem: “Within a single region, are all food groups rising in price simultaneously (systemic inflation), or are hikes isolated to specific categories like Meat & Poultry?”
 
-        ####### The Formula
-        $$z = \\frac{x - \\mu}{\\sigma}$$
 
-        Where:
-        - **$x$**: The observed price.
-        - **$\\mu$ (Mu)**: The mean (average) price for that specific commodity.
-        - **$\\sigma$ (Sigma)**: The standard deviation of the price.
+### Objectives:
+The primary objective of this Learning Evidence is to develop and implement a comprehensive dashboard utilizing different data visualization tools that utilizes automated price tracking and statistical normalization techniques to identify, analyze, and communicate commodity price volatility and market disparities across various regions and markets.
 
-        ### Python Implementation
-        In your system, you utilize the `.transform()` method to apply this calculation across grouped commodities:
+Specfically, it aims to address the following objectives:
+1. To Quantify Inter-Market Price Equity: Present visualizations that identifies price disparities across local markets to pinpoint specific geographic "hotspots" where consumers face significantly higher price floors for essential commodities.
+2. To Evaluate Cross-Category Volatility Sensitivity: Assess the relative price sensitivity of different food groups (e.g., Grains, Meat, Seafood) by utilizing the Coefficient of Variation (CV) to determine which sectors are most vulnerable to supply chain disruptions.
+3. To Track Longitudinal Purchasing Power Erosion: Measure the specific "peso-impact" of commodity price changes over time by correlating historical price trends with a narrative summary of absolute price acceleration.
+4. To Visualize Systemic vs. Isolated Inflationary Trends: Enable high-density sector scanning to determine if price increases are systemic across an entire region or isolated to specific commodity types, allowing for more targeted policy interventions.
 
-        ```python
-        fd['Z_Score'] = fd.groupby('Commodity')['Price'].transform(
-            lambda x: (x - x.mean()) / x.std(ddof=0)
-        )
+
+### Dataset Description
+To address the problems and objectives of the study, the researchers have utilized the data from the **World Food Programme's (WFP) VAM (Vulnerability Analysis and Mapping) Global Food Prices database**. The dataset spans a **26-year period** from 2000 to 2023, capturing market-level food price records across the Philippines throughout the said period for time-series analysis. 
+
+The dataset comprises **216,474 records** representing price observations collected at the individual market level in the Philippines, collected every 15th of the month. Below is a detailed explanation of the columns contained in the `prices_retail.csv` dataset. These fields provide the geographic, temporal, and statistical foundation for the dashboard's analysis.
+
+| Column Name | Description |
+| :--- | :--- |
+| **Admin 1** | The primary geographical division, representing the **Region** (e.g., Davao Region). |
+| **Admin 2** | The secondary division, representing the **Province or District** within the region. |
+| **Market Name** | The specific **Retail Market** or trading center where the price observation was recorded. |
+| **Commodity** | The specific name of the **Food Item** or essential good (e.g., "Rice Special", "Red Onion"). |
+| **Price Date** | The **Timestamp** of the price record, typically logged on a monthly or bi-monthly basis. |
+| **Price** | The actual **Retail Price** recorded at the market, expressed in Philippine Pesos (PHP). |
+| **Unit** | The **Unit of Measurement** for the price (e.g., "KG" for weight, "LI" for volume). |
+| **Trend** | A **Statistical Baseline** (often a moving average) used to identify long-term price direction. |
+| **Pewi** | A specialized **ALPS Indicator** that measures the intensity of current price deviations. |
+| **ALPS Phase** | The **Market Status** classification (Normal, Stress, Alert, or Crisis) based on historical thresholds. |
+| **Year** | The **Calendar Year** extracted from the Price Date for easier temporal filtering. |
+| **Month** | The **Calendar Month** (1-12) used to analyze seasonal trends and monthly momentum. |
+| **Z_Score** | The **Standardized Deviation**, representing how many units of standard deviation a price is from its mean. |
+| **Price_Fluctuation** | The **Absolute Change** in price (PHP) compared to the previous recording period. |
+| **Percent_Change** | The **Relative Change (%)** in price, showing the rate of inflation or rollback. |
+| **Commodity_Type** | An **Engineered Feature** that aggregates specific items into broader categories (e.g., "Fish & Seafood"). |  
+
+
+### Methodology
+
+
+#### Commodity Type
+This column is feature-engineered to serve as a high-level categorical abstraction. While raw datasets often list specific items (e.g., "Well-milled Rice," "Regular-milled Rice," "Red Onion," "White Onion"), these individual labels can be too granular for identifying broad economic shifts.
+
+| Commodity Type | Commodity List |
+| -------- | -------- |
+| Grains & Staples    | Rice (regular, milled) Rice (well milled), Rice (special), Rice (milled, superior), Rice (premium), Maize (yellow), Maize (white), Semolina (yellow), Semolina (white) |
+| Meat & Poultry    | Meat (pork), Meat (beef, chops with bones), Meat (chicken, whole), Eggs, Meat (pork, with bones), Meat (beef), Eggs (duck), Meat (pork, hock), Chicken   |
+| Fish & Seafood | Fish (milkfish), Fish (roundscad), Fish (tilapia), Anchovies, Shrimp (tiger), Crab, Fish (redbelly yellowtail fusilier), Fish (slipmouth), Fish (fresh), Fish (threadfin bream), Shrimp (endeavor), Fish (mackerel, fresh), Fish (frigate tuna) |
+| Fruits | Coconut, Bananas (lakatan), Bananas (latundan), Calamansi, Mangoes (carabao), Bananas (saba), Pineapples, Mandarins, Papaya, Mangoes (piko) |
+| Vegetables, Tubers & Legumes | Tomatoes, Carrots, Cabbage, Onions (red), Potatoes (Irish), Eggplants, Bitter melon, Squashes, Beans (mung), Choko, Ginger, Garlic, Beans (string), Groundnuts (shelled), Sweet potatoes, Beans (green, fresh), Bottle gourd, Cabbage (chinese), Onions (white), Sweet Potato leaves, Groundnuts (unshelled), Water spinach, Taro |
+
+
+This is designed for the following purposes:
+1. Statistical Power for Volatility Metrics: To calculate the Coefficient of Variation (CV) effectively, by clustering data points through commodity types
+2. Dimensionality Reduction: Through maximizing aggregates (e.g., mean, min, max, and std) to minimize the number of data points displayed
+3. Economic Behavioral Analysis: Different types of food follow different supply chain rules. Categorizing them allows you to see if a price hike is a "Seafood-only" seasonal issue or a "Systemic" inflation affecting all types.
+4. Trend Normalization: It allows for "Apples-to-Apples" comparisons. You can compare the average Z-score of the "Meat" sector against the "Vegetables" sector to see which part of the consumer's basket is under the most stress.
+
+
+#### The Z-Score
+The *Z-Score* is used to determine how far a specific price point is from the historical average, measured in units of standard deviation. This allows for a "fair comparison" between commodities with vastly different price ranges (e.g., comparing a ₱5 increase in Rice vs. a ₱50 increase in Beef).
+
+$$z = \\frac{x - \\mu}{\\sigma}$$
+
+Where:
+- **$x$**: The observed price.
+- **$\\mu$ (Mu)**: The mean (average) price for that specific commodity.
+- **$\\sigma$ (Sigma)**: The standard deviation of the price.
+
+
+#### The Coefficient of Variation
+
+The **Coefficient of Variation (The Sensitivity Meter)**
+While the *Z-score* looks at a single data point, the CV looks at the "spread" of a whole category. It is a dimensionless ratio, which makes it the best tool for comparing volatility across different scales. The formula below was used for calculating the Coefficient of Variation (CV)
+
+$$CV = \\frac{\\sigma}{\\mu}$$
+
+Where:
+- **$\\sigma$ (Sigma)**: The Standard Deviation of the price data.
+- **$\\mu$ (Mu)**: The Mean (Average) of the price data.
+
+Interpretation:
+- **Low CV**: Indicates that the data points are close to the mean, suggesting price stability across markets or over time.
+- **High CV**: Indicates a high level of dispersion relative to the mean, suggesting price volatility or significant price differences between markets.
         """)
     )
 
 
 app_ui = ui.page_fluid(
+    ui.head_content(
+        ui.tags.script(src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"),
+        ui.tags.script(
+            """
+            MathJax.Hub.Config({
+                tex2jax: {
+                    inlineMath: [['$','$']],
+                    displayMath: [['$$','$$'], ['\\[','\\]']],
+                    processEscapes: true
+                }
+            });
+            """
+        ),
+    ),
+
     # Header for the whole dashboard
-    ui.h2("The 26-year Philippine Food Price Dynamics", style="padding: 15px 0px; border-bottom: 1px solid #ccc;"),
+    ui.h2("Philippine Commodity Price Dashboard", style="padding: 15px 0px; border-bottom: 1px solid #ccc;"),
     
     # The crucial function for left-sided navigation
     ui.navset_pill_list(
-        info_page(),
         summary_page(),
         historical_data_page(),
+        info_page(),
         id="main_nav",
         well=True, # Adds a subtle background behind the navigation pills
         widths=(2, 10)
@@ -873,6 +970,13 @@ def server(input, output, session):
 
         return fig
 
+    # Historical Min-Max Plot: UI
+    @render.ui
+    def hist_min_max_header():
+        return ui.h4(
+            f'Price Range (Min vs Max) by Market for {input.hist_commodity()}'
+        )
+
     # Historical Min-Max Plot
     @render_widget
     def market_min_max_plot():
@@ -882,10 +986,7 @@ def server(input, output, session):
         if df_base.empty:
             return go.Figure().update_layout(title="No data available.")
 
-        # 2. Aggregate Min and Max prices for each market
         market_stats = df_base.groupby('Market Name')['Price'].agg(['min', 'max']).reset_index()
-        
-        # 3. Sort by the maximum price to create a clean "ascending" visual
         market_stats = market_stats.sort_values('max', ascending=True)
 
         fig = go.Figure()
@@ -923,11 +1024,14 @@ def server(input, output, session):
 
         # 7. Styling for your MSI Cyborg 15
         fig.update_layout(
-            title=f"Price Range (Min vs Max) by Market for {input.hist_commodity()}",
+            title="",
             xaxis_title="Price (PHP)",
             yaxis_title="",
             template="plotly_white",
-            height=max(400, len(market_stats) * 30), # Adjusts height based on number of markets
+            height=max(400, len(market_stats) * 30),
+            yaxis=dict(automargin=True),
+            xaxis=dict(automargin=True),
+            autosize=True,
             margin=dict(l=20, r=20, t=60, b=20),
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
         )
