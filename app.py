@@ -727,10 +727,14 @@ def server(input, output, session):
         
         def color_phases(val):
             color = 'black'
-            if "Crisis" in val: color = 'red'
-            elif "Alert" in val: color = 'orange'
-            elif "Stress" in val: color = '#d4af37' # Dark Gold/Yellow
-            elif "Normal" in val: color = 'green'
+            if "Crisis" in val: 
+                color = 'red'
+            elif "Alert" in val: 
+                color = 'orange'
+            elif "Stress" in val:
+                 color = '#d4af37' # Dark Gold/Yellow
+            elif "Normal" in val: 
+                color = 'green'
             return f'color: {color}; font-weight: bold;'
 
         # Sort by biggest hikes by default
