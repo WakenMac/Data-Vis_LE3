@@ -287,8 +287,8 @@ def historical_data_page():
                 ),
                 ui.div(
                     output_widget("market_min_max_plot"),
-                    style="height: 500px; width=100%; overflow-x: auto; overflow-y: auto;"
-                    # style="height: 500px; overflow-x: auto; overflow-y: auto; overflow-x: hidden"
+                    # style="height: 500px; width=100%; overflow-x: auto; overflow-y: auto;"
+                    style="height: 500px; overflow-y: auto; overflow-x: hidden"
                 ),
                 full_screen=True
             ),
