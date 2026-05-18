@@ -4,4 +4,3 @@ shiny
 shinywidgets 
 plotly 
 plotnine
-rsconnect-python
